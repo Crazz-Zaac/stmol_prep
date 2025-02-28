@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MCQ Practice - Random Image Slideshow with Timer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100vh;
+    }
+    .container {
+      display: flex;
+      width: 100%;
+      height: 100%;
+    }
+    .main-content {
+      flex: 3;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .sidebar {
+      flex: 1;
+      background-color: #f0f0f0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .image-container {
+      width: 80%;
+      height: 70%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .image-name {
+      margin-top: 10px;
+      font-size: 18px;
+      text-align: center;
+    }
+    .nav-buttons {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .timer-display {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    .timer-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+    .timer-settings {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+    .timer-input {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .timer-input input {
+      width: 60px;
+      padding: 5px;
+      text-align: center;
+      font-size: 16px;
+    }
+    .timer-alert {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 0, 0, 0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      animation: flash 1s infinite;
+      display: none;
+    }
+    .alert-message {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 24px;
+      font-weight: bold;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+    .close-alert {
+      margin-top: 10px;
+      padding: 10px 20px;
+    }
+    @keyframes flash {
+      0% {
+        background-color: rgba(255, 0, 0, 0.3);
+      }
+      50% {
+        background-color: rgba(255, 0, 0, 0.7);
+      }
+      100% {
+        background-color: rgba(255, 0, 0, 0.3);
+      }
+    }
+    .timer-display.warning {
+      color: red;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+    .mode-button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 15px;
+      font-size: 18px;
+      background-color: #2196f3;
+    }
+    .mode-button:hover {
+      background-color: #0b7dda;
+    }
+    .page-title {
+      margin-bottom: 20px;
+      color: #2196f3;
+      font-size: 24px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="main-content">
+      <h1 class="page-title">Short Question Practice Mode</h1>
+      <div class="image-container">
+        <img id="displayedImage" src="" alt="MCQ Question" />
+        <div class="image-name" id="imageName"></div>
+      </div>
+      <div class="nav-buttons">
+        <button id="prevButton">Previous</button>
+        <button id="nextButton">Next</button>
+        <button id="returnToMain" class="mode-button">Return to Main Questions</button>
+      </div>
+    </div>
+    <div class="sidebar">
+      <h2>Timer</h2>
+      <div class="timer-display" id="timer">00:00:00</div>
+      <div class="timer-controls">
+        <button id="startTimer">Start</button>
+        <button id="pauseTimer">Pause</button>
+        <button id="resetTimer">Reset</button>
+      </div>
+      <div class="timer-settings">
+        <h3>Set Timer</h3>
+        <div class="timer-input">
+          <label for="hourInput">Hours:</label>
+          <input type="number" id="hourInput" min="0" max="23" value="0" />
+        </div>
+        <div class="timer-input">
+          <label for="minuteInput">Minutes:</label>
+          <input type="number" id="minuteInput" min="0" max="59" value="15" />
+        </div>
+        <div class="timer-input">
+          <label for="secondInput">Seconds:</label>
+          <input type="number" id="secondInput" min="0" max="59" value="0" />
+        </div>
+        <button id="setTimer">Set Timer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="timer-alert" id="timerAlert">
+    <div class="alert-message">
+      <div>Time's Up!</div>
+      <button class="close-alert" id="closeAlert">Close</button>
+    </div>
+  </div>
+
+  <script>
+    // Images will be loaded from the mcq folder
+    const images = [];
+    let currentIndex = 0;
+    let shuffledImages = [];
+
+    // Timer variables
+    let timerInterval;
+    let seconds = 0;
+    let minutes = 0;
+    let hours = 0;
+    let timerRunning = false;
+    let timerMode = 'stopwatch'; // 'stopwatch' or 'countdown'
+    let targetTime = 0; // For countdown timer
+
+    // Function to format time with leading zeros
+    function formatTime(val) {
+      return val < 10 ? `0${val}` : val;
+    }
+
+    // Update timer display
+    function updateTimer() {
+      if (timerMode === 'stopwatch') {
+        seconds++;
+        if (seconds >= 60) {
+          seconds = 0;
+          minutes++;
+          if (minutes >= 60) {
+            minutes = 0;
+            hours++;
+          }
+        }
+      } else if (timerMode === 'countdown') {
+        if (seconds === 0) {
+          if (minutes === 0) {
+            if (hours === 0) {
+              // Timer reached zero
+              timerComplete();
+              return;
+            } else {
+              hours--;
+              minutes = 59;
+              seconds = 59;
+            }
+          } else {
+            minutes--;
+            seconds = 59;
+          }
+        } else {
+          seconds--;
+        }
+
+        // Warning when less than 10% of time remains
+        const currentTotalSeconds = hours * 3600 + minutes * 60 + seconds;
+        const timerDisplay = document.getElementById('timer');
+
+        if (currentTotalSeconds <= targetTime * 0.1 && currentTotalSeconds > 0) {
+          timerDisplay.classList.add('warning');
+        } else {
+          timerDisplay.classList.remove('warning');
+        }
+      }
+
+      document.getElementById('timer').textContent = 
+        `${formatTime(hours)}:${formatTime(minutes)}:${formatTime(seconds)}`;
+    }
+
+    // Timer complete
+    function timerComplete() {
+      pauseTimer();
+      document.getElementById('timer').textContent = "00:00:00";
+      document.getElementById('timer').classList.add('warning');
+      document.getElementById('timerAlert').style.display = 'flex';
+    }
+
+    // Timer control functions
+    function startTimer() {
+      if (!timerRunning) {
+        timerInterval = setInterval(updateTimer, 1000);
+        timerRunning = true;
+      }
+    }
+
+    function pauseTimer() {
+      clearInterval(timerInterval);
+      timerRunning = false;
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      seconds = 0;
+      minutes = 0;
+      hours = 0;
+      document.getElementById('timer').textContent = '00:00:00';
+      document.getElementById('timer').classList.remove('warning');
+      timerMode = 'stopwatch';
+    }
+
+    function setCountdownTimer() {
+      resetTimer();
+
+      const hourInput = parseInt(document.getElementById('hourInput').value) || 0;
+      const minuteInput = parseInt(document.getElementById('minuteInput').value) || 0;
+      const secondInput = parseInt(document.getElementById('secondInput').value) || 0;
+
+      if (hourInput === 0 && minuteInput === 0 && secondInput === 0) {
+        alert("Please set a valid time greater than zero");
+        return;
+      }
+
+      hours = hourInput;
+      minutes = minuteInput;
+      seconds = secondInput;
+
+      // Calculate total seconds for percentage calculation
+      targetTime = hours * 3600 + minutes * 60 + seconds;
+
+      timerMode = 'countdown';
+      document.getElementById('timer').textContent =
+        `${formatTime(hours)}:${formatTime(minutes)}:${formatTime(seconds)}`;
+    }
+
+    function closeAlert() {
+      document.getElementById('timerAlert').style.display = 'none';
+      document.getElementById('timer').classList.remove('warning');
+      resetTimer();
+    }
+
+    // Fisher-Yates shuffle algorithm to randomize images
+    function shuffleArray(array) {
+      const newArray = [...array];
+      for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+      }
+      return newArray;
+    }
+
+    // Display the current image
+    function displayImage() {
+      const img = document.getElementById('displayedImage');
+      const nameDisplay = document.getElementById('imageName');
+
+      img.src = shuffledImages[currentIndex];
+
+      // Extract the filename without extension and path
+      const filename = shuffledImages[currentIndex].split('/').pop().split('.')[0];
+      nameDisplay.textContent = filename;
+    }
+
+    // Load MCQ images from the JSON file
+    async function loadImagesFromFolder() {
+      try {
+        // Fetch the JSON file containing the list of MCQ images
+        const response = await fetch('mcq-images.json');
+        if (!response.ok) {
+          throw new Error('Failed to load MCQ image manifest');
+        }
+
+        const data = await response.json();
+
+        // Add path prefix to each image filename
+        data.images.forEach(filename => {
+          images.push(`mcq/${filename}`);
+        });
+
+        // Shuffle the images
+        shuffledImages = shuffleArray(images);
+
+        // Display the first image
+        if (shuffledImages.length > 0) {
+          displayImage();
+        } else {
+          document.getElementById('imageName').textContent = 'No MCQ images found';
+        }
+      } catch (error) {
+        console.error('Error loading MCQ images:', error);
+        document.getElementById('imageName').textContent = 'Error loading MCQ images: ' + error.message;
+
+        // Fallback to inline list if JSON file fails to load
+        useInlineImageList();
+      }
+    }
+
+    // Fallback to inline list of MCQ images
+    function useInlineImageList() {
+      // Assuming there are MCQ images with similar naming convention
+      const imageFiles = [
+        "sq_10.png", "sq_12.png", "sq_14.png", "sq_16.png", "sq_18.png", "sq_1.png", "sq_21.png", "sq_23.png", "sq_25.png", "sq_27.png", "sq_29.png", "sq_3.png", "sq_5.png", "sq_7.png", "sq_9.png",  
+        "sq_11.png", "sq_13.png", "sq_15.png", "sq_17.png", "sq_19.png", "sq_20.png", "sq_22.png", "sq_24.png", "sq_26.png", "sq_28.png", "sq_2.png", "sq_4.png", "sq_6.png", "sq_8.png"
+      ];
+
+      imageFiles.forEach(filename => {
+        images.push(`mcq/${filename}`);
+      });
+
+      shuffledImages = shuffleArray(images);
+
+      if (shuffledImages.length > 0) {
+        displayImage();
+      } else {
+        document.getElementById('imageName').textContent = 'No MCQ images found';
+      }
+    }
+
+    // Navigation functions
+    function nextImage() {
+      if (shuffledImages.length === 0) return;
+      currentIndex = (currentIndex + 1) % shuffledImages.length;
+      displayImage();
+    }
+
+    function prevImage() {
+      if (shuffledImages.length === 0) return;
+      currentIndex = (currentIndex - 1 + shuffledImages.length) % shuffledImages.length;
+      displayImage();
+    }
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', () => {
+      // Load MCQ images
+      loadImagesFromFolder();
+
+      // Navigation event listeners
+      document.getElementById('nextButton').addEventListener('click', nextImage);
+      document.getElementById('prevButton').addEventListener('click', prevImage);
+      document.getElementById('returnToMain').addEventListener('click', () => {
+        // Change this URL to your main questions page
+        window.location.href = 'index.html';
+      });
+
+      // Timer control event listeners
+      document.getElementById('startTimer').addEventListener('click', startTimer);
+      document.getElementById('pauseTimer').addEventListener('click', pauseTimer);
+      document.getElementById('resetTimer').addEventListener('click', resetTimer);
+      document.getElementById('setTimer').addEventListener('click', setCountdownTimer);
+
+      // Alert close button listener
+      document.getElementById('closeAlert').addEventListener('click', closeAlert);
+    });
+  </script>
+</body>
+</html>
